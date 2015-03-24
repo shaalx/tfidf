@@ -59,7 +59,7 @@ public class TFIDF {
     public  String readFile(String file) throws FileNotFoundException, IOException
     {
         StringBuffer strSb = new StringBuffer(); //String is constant£¬ StringBuffer can be changed.
-        InputStreamReader inStrR = new InputStreamReader(new FileInputStream(file), "gbk"); //byte streams to character streams
+        InputStreamReader inStrR = new InputStreamReader(new FileInputStream(file), "utf-8"); //byte streams to character streams
         BufferedReader br = new BufferedReader(inStrR); 
         String line = br.readLine();
         while(line != null){
@@ -81,7 +81,7 @@ public class TFIDF {
     	   dirs.createNewFile(); 
 	   }
         FileOutputStream FILE = new FileOutputStream(dir + "\\" + f.getName());        
-        OutputStreamWriter outStrW = new OutputStreamWriter(FILE, "gbk"); //byte streams to character streams
+        OutputStreamWriter outStrW = new OutputStreamWriter(FILE, "utf-8"); //byte streams to character streams
         for(String it : content){
             outStrW.write(it);
             outStrW.flush();
