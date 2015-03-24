@@ -275,6 +275,25 @@ public class TFIDF {
         }
     }
     
+    //    tf-all saved to files
+    public  void saveTfAll(String dir,HashMap<String, List<Map.Entry<String, Float>>> tfidf) throws IOException{
+        
+        Iterator iter1 = tfidf.entrySet().iterator();
+        String s = "";
+        while(iter1.hasNext()){
+            Map.Entry entrys = (Map.Entry)iter1.next();
+            String filename = entrys.getKey().toString();
+            List<Map.Entry<String, Float>> temp = (List<Map.Entry<String, Float>>) entrys.getValue();
+
+            ArrayList<String> tfidfList = new ArrayList<String>();
+            for (Map.Entry<String, Float> entry : temp) {
+            	s = entry.getValue().toString() + "\t" + entry.getKey().toString() + "\n";
+            	tfidfList.add(s);
+			}
+            writeFile(dir, filename, tfidfList);
+        }
+    }
+    
     // ·Ö´Ê
     public List<String> getTerms(String file){
 		List<String> terms = new ArrayList<String>();
