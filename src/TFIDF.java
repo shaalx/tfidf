@@ -93,13 +93,14 @@ public class TFIDF {
     public  ArrayList<String> cutWords(String file) throws IOException{
         
         ArrayList<String> words = new ArrayList<String>();
-        String text = TFIDF_V.readFile(file);
-//        String[] result = text.split("\t");
-//        for(int i =0;i<result.length;i++){
-//            words.add(result[i]);
-//        }
-        IKAnalyzer analyzer = new IKAnalyzer();
-        words = analyzer.split(text);
+//        String text = TFIDF_V.readFile(file);
+////        String[] result = text.split("\t");
+////        for(int i =0;i<result.length;i++){
+////            words.add(result[i]);
+////        }
+//        IKAnalyzer analyzer = new IKAnalyzer();
+//        words = analyzer.split(text);
+        words = (ArrayList<String>) getTerms(file);
         
         return words;
     }
@@ -205,8 +206,8 @@ public class TFIDF {
         }
         return resIdf;
     }
-    public  void tf_idf(HashMap<String,HashMap<String, Float>> all_tf,HashMap<String, Float> idfs){
-        HashMap<String, HashMap<String, Float>> resTfIdf = new HashMap<String, HashMap<String, Float>>();
+    public HashMap<String, List<Map.Entry<String, Float>>> tf_idf(HashMap<String,HashMap<String, Float>> all_tf,HashMap<String, Float> idfs){
+        HashMap<String, List<Map.Entry<String, Float>>> resTfIdf = new HashMap<String, List<Map.Entry<String, Float>>>();
             
         int docNum = FileList.size();
         for(int i = 0; i < docNum; i++){
@@ -231,59 +232,97 @@ public class TFIDF {
                 }
             });
             System.out.println(ftidfEntryList);
-            resTfIdf.put(filepath, tfidf);
+            
+            resTfIdf.put(filepath, ftidfEntryList);
         }
         System.out.println("TF-IDF for Every file is :");
         DisTfIdf(resTfIdf);
+        return resTfIdf;
     }
-    public  void DisTfIdf(HashMap<String, HashMap<String, Float>> tfidf){
+    public  void DisTfIdf(HashMap<String, List<Map.Entry<String, Float>>> tfidf){
         Iterator iter1 = tfidf.entrySet().iterator();
         while(iter1.hasNext()){
             Map.Entry entrys = (Map.Entry)iter1.next();
             System.out.println("FileName: " + entrys.getKey().toString());
             System.out.print("{");
-            HashMap<String, Float> temp = (HashMap<String, Float>) entrys.getValue();
-            Iterator iter2 = temp.entrySet().iterator();
-            while(iter2.hasNext()){
-                Map.Entry entry = (Map.Entry)iter2.next(); 
-                System.out.print(entry.getKey().toString() + " = " + entry.getValue().toString() + ", ");
-            }
+            List<Map.Entry<String, Float>> temp = (List<Map.Entry<String, Float>>) entrys.getValue();
+
+            for (Map.Entry<String, Float> entry : temp) {
+            	System.out.print(entry.getKey().toString() + " = " + entry.getValue().toString() + ", ");
+			}
+
             System.out.println("}");
         }
         
     }
     
     //    tf-all saved to files
-    public  void saveTfIdfAll(String dir,HashMap<String, HashMap<String, Float>> tfidf) throws IOException{
+    public  void saveTfIdfAll(String dir,HashMap<String, List<Map.Entry<String, Float>>> tfidf) throws IOException{
+        
         Iterator iter1 = tfidf.entrySet().iterator();
-        String s ="";
+        String s = "";
         while(iter1.hasNext()){
             Map.Entry entrys = (Map.Entry)iter1.next();
-            String file = entrys.getKey().toString();
+            String filename = entrys.getKey().toString();
+            List<Map.Entry<String, Float>> temp = (List<Map.Entry<String, Float>>) entrys.getValue();
+
             ArrayList<String> tfidfList = new ArrayList<String>();
-            
-            HashMap<String, Float> temp = (HashMap<String, Float>) entrys.getValue();
-            Iterator iter2 = temp.entrySet().iterator();
-            while(iter2.hasNext()){
-                Map.Entry entry = (Map.Entry)iter2.next(); 
-                s = entry.getKey().toString() + " = " + entry.getValue().toString() + "\n";
-                tfidfList.add(s);
-            }
-            writeFile(dir,file,tfidfList);
+            for (Map.Entry<String, Float> entry : temp) {
+            	s = entry.getValue().toString() + "\t" + entry.getKey().toString() + "\n";
+            	tfidfList.add(s);
+			}
+            writeFile(dir, filename, tfidfList);
         }
     }
+    
+    // ·Ö´Ê
+    public List<String> getTerms(String file){
+		List<String> terms = new ArrayList<String>();
+        StringBuffer strSb = new StringBuffer(); //String is constant£¬ StringBuffer can be changed.
+        try{
+	        InputStreamReader inStrR = new InputStreamReader(new FileInputStream(file), "utf-8"); //byte streams to character streams
+	        BufferedReader br = new BufferedReader(inStrR); 
+	        String line = br.readLine();
+	        String[] spilts = line.split("\t");
+	        for (String it : spilts) {
+	        	terms.add(it);
+			}
+	        inStrR.close();
+       	}catch(Exception e){}
+		return terms;
+	}
+    // ¹Ø¼ü×Ö
+    public List<String> getKeys(String file){
+		List<String> terms = new ArrayList<String>();
+        StringBuffer strSb = new StringBuffer(); //String is constant£¬ StringBuffer can be changed.
+        try{
+	        InputStreamReader inStrR = new InputStreamReader(new FileInputStream(file), "utf-8"); //byte streams to character streams
+	        BufferedReader br = new BufferedReader(inStrR); 
+	        String line = br.readLine();
+	        String[] spilts = line.split("\t");
+	        for (String it : spilts) {
+	        	terms.add(it);
+			}
+	        inStrR.close();
+       	}catch(Exception e){}
+		return terms;
+	}
     public static void main(String[] args) throws IOException {
         // TODO Auto-generated method stub
-        String file = "./testfiles";
-        String dir = "./result";
+    	String result_dir ="./result";
+    	String tf_dir ="./tf";
+    	String tf_idf_dir ="./tf_idf";
+        String origin_dir = "E:\\ItemForGo\\src\\github.com\\shaalx\\sstruct\\static\\spilt\\";
+        String key_dir = "E:\\ItemForGo\\src\\github.com\\shaalx\\sstruct\\static\\key\\";
+        
         TFIDF TFIDF_v = new TFIDF();
         TFIDF_v.getTFIDF();
-        HashMap<String,HashMap<String, Float>> all_tf = TFIDF_v.tfAllFiles(file);
+        HashMap<String,HashMap<String, Float>> all_tf = TFIDF_v.tfAllFiles(origin_dir);
         System.out.println();
         HashMap<String, Float> idfs = TFIDF_v.idf(all_tf);
         System.out.println();
-        TFIDF_v.tf_idf(all_tf, idfs);
-        TFIDF_v.saveTfIdfAll(dir,all_tf);
+        HashMap<String, List<Map.Entry<String, Float>>> all_tf_idfs = TFIDF_v.tf_idf(all_tf, idfs);
+        TFIDF_v.saveTfIdfAll(tf_idf_dir,all_tf_idfs);
     }
 
 }
